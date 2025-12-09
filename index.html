@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINAL CLEAN - Beluga Chat</title>
+    <style>
+        /* Base page setup - Pure Dark Background */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #36393f; /* Uniform dark background */
+            font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+        }
+
+        /* CHAT SCREEN: Now just a viewport container (no fixed size, borders, or shadows) */
+        .chat-screen {
+            position: relative; 
+            color: #dcddde;
+            width: 100vw; /* Use full viewport width */
+            height: 100vh; /* Use full viewport height */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Message Layout & Centering */
+        .message-row {
+            display: flex;
+            align-items: flex-start;
+            
+            /* Absolute positioning to keep the message centered */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            
+            /* Max width to keep the message from stretching too far */
+            max-width: 350px; 
+            padding: 10px;
+            box-sizing: border-box;
+            
+            opacity: 0; 
+            transition: opacity 0.05s ease-out, transform 0.05s ease-out; 
+            pointer-events: none;
+        }
+        .message-row.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* PFP and Content Styles */
+        .pfp { 
+            font-size: 28px; width: 45px; height: 45px; line-height: 45px; text-align: center; border-radius: 50%; margin-right: 10px; background-color: #202225; flex-shrink: 0;
+        }
+        .message-content { 
+            max-width: 100%; display: flex; flex-direction: column;
+        }
+        .header { 
+            display: flex; align-items: baseline; margin-bottom: 2px;
+        }
+        .sender { 
+            font-weight: 600; font-size: 15px; margin-right: 8px;
+        }
+        .timestamp { 
+            font-size: 11px; color: #72767d; 
+        }
+        .message-bubble { 
+            /* Added background for the message text itself for better contrast when cropped */
+            background-color: #2f3136; 
+            padding: 5px 10px; 
+            border-radius: 6px;
+            font-size: 18px; 
+            word-wrap: break-word; 
+            line-height: 1.4;
+        }
+        
+        /* HIDDEN START OVERLAY STYLES */
+        #start-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 100; /* Ensure it is on top */
+            cursor: pointer;
+            opacity: 0; /* Make it invisible */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-screen" id="chatScreen">
+        
+        <div id="start-overlay"></div>
+
+        <div class="message-row" data-time="0.0">
+            <div class="pfp">🚀</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender elon">Elon Musk</div>
+                    <div class="timestamp">10:01 PM</div>
+                </div>
+                <div class="message-bubble">New poll: Who’s building the real Metaverse? 🤔 The one with gravity? 🤣</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="2.5">
+            <div class="pfp">🤖</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender zuck">Mark Zuckerberg</div>
+                    <div class="timestamp">10:01 PM</div>
+                </div>
+                <div class="message-bubble">It’s already built. You’re in it right now. VR is the only reality. 🤖👓</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="4.0">
+            <div class="pfp">📦</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender jeff">Jeff Bezos</div>
+                    <div class="timestamp">10:02 PM</div>
+                </div>
+                <div class="message-bubble">I prefer owning the *real* space above your virtual one. Blue Origin > Meta. 📦🌌</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="6.5">
+            <div class="pfp">💸</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender beast">MrBeast</div>
+                    <div class="timestamp">10:02 PM</div>
+                </div>
+                <div class="message-bubble">I’m giving away $1M to the first person who finds Mars in VR! GO! 💸💰🎉</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="9.0">
+            <div class="pfp">🚀</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender elon">Elon Musk</div>
+                    <div class="timestamp">10:03 PM</div>
+                </div>
+                <div class="message-bubble">Lame. I’m landing Starship on a pile of cash, funded by dog memes. 🚀🤑</div>
+            </div>
+        </div>
+
+        <div class="message-row" data-time="11.5">
+            <div class="pfp">🤖</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender zuck">Mark Zuckerberg</div>
+                    <div class="timestamp">10:03 PM</div>
+                </div>
+                <div class="message-bubble">My AI is already trading your dog memes. Quietly. Efficiency is power. 🧠</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="13.0">
+            <div class="pfp">📦</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender jeff">Jeff Bezos</div>
+                    <div class="timestamp">10:04 PM</div>
+                </div>
+                <div class="message-bubble">You two argue over code and rockets. I sell the chips and the fuel. The ultimate flex. 📈</div>
+            </div>
+        </div>
+
+        <div class="message-row" data-time="15.5">
+            <div class="pfp">💸</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender beast">MrBeast</div>
+                    <div class="timestamp">10:04 PM</div>
+                </div>
+                <div class="message-bubble">Flex is giving 10,000 people free iPhones. Who needs space when you have subs? 😂📱</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="18.0">
+            <div class="pfp">🚀</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender elon">Elon Musk</div>
+                    <div class="timestamp">10:05 PM</div>
+                </div>
+                <div class="message-bubble">We need a tunnel from Mars to the Moon. Get to work, Zuck! Boring Company time. ⛏️👽</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="20.0">
+            <div class="pfp">🤖</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender zuck">Mark Zuckerberg</div>
+                    <div class="timestamp">10:05 PM</div>
+                </div>
+                <div class="message-bubble">I’m building the neural link for that tunnel. You provide the dirt. 🤫</div>
+            </div>
+        </div>
+
+        <div class="message-row" data-time="22.5">
+            <div class="pfp">📦</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender jeff">Jeff Bezos</div>
+                    <div class="timestamp">10:06 PM</div>
+                </div>
+                <div class="message-bubble">Amazon can deliver the tunnel parts in 2 days, guaranteed. Prime Space. 🚚💨</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="25.0">
+            <div class="pfp">💸</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender beast">MrBeast</div>
+                    <div class="timestamp">10:06 PM</div>
+                </div>
+                <div class="message-bubble">Whoever builds it first gets $5M from me! Challenge accepted! 💪</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="27.5">
+            <div class="pfp">🚀</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender elon">Elon Musk</div>
+                    <div class="timestamp">10:07 PM</div>
+                </div>
+                <div class="message-bubble">Done. Sending a Tesla Roadster through it. It has the best steering. 🏎️</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="29.5">
+            <div class="pfp">🤖</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender zuck">Mark Zuckerberg</div>
+                    <div class="timestamp">10:07 PM</div>
+                </div>
+                <div class="message-bubble">I’ll race you using my Metaverse avatar. No latency. Unbeatable. 🌐</div>
+            </div>
+        </div>
+
+        <div class="message-row" data-time="32.0">
+            <div class="pfp">📦</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender jeff">Jeff Bezos</div>
+                    <div class="timestamp">10:08 PM</div>
+                </div>
+                <div class="message-bubble">The Roadster runs on Amazon servers, right? Asking for a friend. 😉</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="33.5">
+            <div class="pfp">💸</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender beast">MrBeast</div>
+                    <div class="timestamp">10:08 PM</div>
+                </div>
+                <div class="message-bubble">I just bought 100 Roadsters for a new video. Whoops. 😅</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="35.0">
+            <div class="pfp">🚀</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender elon">Elon Musk</div>
+                    <div class="timestamp">10:09 PM</div>
+                </div>
+                <div class="message-bubble">Ugh. The supply chain. You bought them all. 🙄</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="36.5">
+            <div class="pfp">🤖</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender zuck">Mark Zuckerberg</div>
+                    <div class="timestamp">10:09 PM</div>
+                </div>
+                <div class="message-bubble">The supply chain is inefficient. Switch to digital vehicles. 👾</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="38.0">
+            <div class="pfp">📦</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender jeff">Jeff Bezos</div>
+                    <div class="timestamp">10:10 PM</div>
+                </div>
+                <div class="message-bubble">Digital vehicles still need digital storage. Guess who sells that? 💰</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="40.0">
+            <div class="pfp">💸</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender beast">MrBeast</div>
+                    <div class="timestamp">10:10 PM</div>
+                </div>
+                <div class="message-bubble">I'm making a 24-hour video inside an Amazon warehouse! Subscribe! 🔔</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="42.0">
+            <div class="pfp">🚀</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender elon">Elon Musk</div>
+                    <div class="timestamp">10:11 PM</div>
+                </div>
+                <div class="message-bubble">Focus, guys! Space or nothing! 🫡🛰️</div>
+            </div>
+        </div>
+        
+        <div class="message-row" data-time="44.0">
+            <div class="pfp">🤖</div>
+            <div class="message-content">
+                <div class="header">
+                    <div class="sender zuck">Mark Zuckerberg</div>
+                    <div class="timestamp">10:11 PM</div>
+                </div>
+                <div class="message-bubble">See you in the simulation. ✌️</div>
+            </div>
+        </div>
+        
+    </div>
+
+    <audio id="notification-audio-tag" src="discord-notification.mp3" preload="auto"></audio>
+
+    <script>
+        const messages = Array.from(document.querySelectorAll('.message-row'));
+        const messageTimes = messages.map(msg => parseFloat(msg.dataset.time));
+        let startTime = null;
+        let messageIndex = 0;
+        let activeMessageTime = -1; 
+        
+        const chatDuration = 45.0;      
+        
+        // --- Audio Setup ---
+        // CRITICAL: The path is now just the file name.
+        const RELATIVE_AUDIO_PATH = "discord-notification.mp3"; 
+        let audioNotification = new Audio(RELATIVE_AUDIO_PATH);
+        // --- End Audio Setup ---
+
+        // Get the overlay element
+        const startOverlay = document.getElementById('start-overlay');
+        
+
+        function showNextMessage(elapsedTime) {
+            let nextMessageTime = (messageIndex < messages.length) ? messageTimes[messageIndex] : chatDuration + 1;
+
+            // 1. Logic to clear the previous message (original GAPLESS FIX logic, preserved)
+            if (activeMessageTime !== -1 && elapsedTime >= nextMessageTime) {
+                const active = document.querySelector('.message-row.active');
+                if (active) {
+                    active.classList.remove('active');
+                }
+                activeMessageTime = -1; 
+            }
+
+            // 2. Logic to show a new message 
+            if (activeMessageTime === -1 && messageIndex < messages.length) {
+                const messageTime = messageTimes[messageIndex];
+
+                if (elapsedTime >= messageTime) {
+                    const newMessage = messages[messageIndex];
+                    
+                    newMessage.classList.add('active');
+                    activeMessageTime = elapsedTime; 
+
+                    // Play the sound (reload/clone is essential for rapid fire)
+                    // We must attempt to play the audio here.
+                    const soundClone = new Audio(audioNotification.src);
+                    
+                    // The trick is to try to play, and if it fails (often due to load timing),
+                    // load the audio file again just before playing.
+                    soundClone.play().catch(e => {
+                        console.error("Audio Play Error:", e); 
+                        // Try loading the file again just in case it wasn't ready
+                        soundClone.load();
+                        soundClone.play().catch(e => console.error("Final Audio Error:", e));
+                    }); 
+                    
+                    messageIndex++;
+                }
+            }
+        }
+
+        function updateChat(timestamp) {
+            if (!startTime) {
+                startTime = timestamp;
+            }
+
+            const elapsedTime = (timestamp - startTime) / 1000;
+
+            showNextMessage(elapsedTime);
+
+            // Continue loop if time is less than total duration OR if a message is currently visible
+            if (elapsedTime < chatDuration || activeMessageTime !== -1) {
+                requestAnimationFrame(updateChat);
+            } else {
+                console.log("Chat sequence finished.");
+            }
+        }
+
+        // --- Start Function ---
+        function startChat() {
+            // Remove the invisible overlay after the user clicks it
+            if (startOverlay) {
+                startOverlay.remove();
+            }
+            
+            if (!startTime) {
+                // IMPORTANT: The first click is used to "prime" the audio engine.
+                // We attempt to play and immediately pause a sound. This satisfies the browser's requirement.
+                audioNotification.load();
+                audioNotification.play().then(() => {
+                    audioNotification.pause();
+                    audioNotification.currentTime = 0;
+                    requestAnimationFrame(updateChat);
+                    console.log("Chat sequence started and audio primed.");
+                }).catch(e => {
+                    console.error("Audio priming failed (safe to proceed):", e);
+                    requestAnimationFrame(updateChat);
+                });
+            }
+        }
+
+        // Start the sequence when the invisible overlay is clicked
+        startOverlay.addEventListener('click', startChat, { once: true });
+        
+    </script>
+
+</body>
+  </html>
